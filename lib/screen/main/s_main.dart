@@ -13,7 +13,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => MainScreenState();
 }
 
-class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
+class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin, TodoDataProvider {
   TabItem _currentTab = TabItem.todo;
   final tabs = [TabItem.todo, TabItem.search];
   final List<GlobalKey<NavigatorState>> navigatorKeys = [];
@@ -50,8 +50,8 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            context.holder.addTodo();
-
+            // TodoDataHolder가 MainScreen보다 상위에 있어서 context.holder 사용 가능
+            todoData.addTodo();
           },
           child: const Icon(EvaIcons.plus),
         ),
@@ -64,17 +64,17 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
       index: _currentIndex,
       children: tabs
           .mapIndexed((tab, index) => Offstage(
-                offstage: _currentTab != tab,
-                child: TabNavigator(
-                  navigatorKey: navigatorKeys[index],
-                  tabItem: tab,
-                ),
-              ))
+        offstage: _currentTab != tab,
+        child: TabNavigator(
+          navigatorKey: navigatorKeys[index],
+          tabItem: tab,
+        ),
+      ))
           .toList());
 
   Future<bool> _handleBackPressed() async {
     final isFirstRouteInCurrentTab =
-        (await _currentTabNavigationKey.currentState?.maybePop() == false);
+    (await _currentTabNavigationKey.currentState?.maybePop() == false);
     if (isFirstRouteInCurrentTab) {
       if (_currentTab != TabItem.todo) {
         _changeTab(tabs.indexOf(TabItem.todo));
@@ -115,10 +115,10 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
     return tabs
         .mapIndexed(
           (tab, index) => tab.toNavigationBarItem(
-            context,
-            isActivated: _currentIndex == index,
-          ),
-        )
+        context,
+        isActivated: _currentIndex == index,
+      ),
+    )
         .toList();
   }
 
